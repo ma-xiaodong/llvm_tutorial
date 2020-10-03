@@ -1,22 +1,12 @@
 #include <iostream>
 #include <string>
-#include "../include/ast.h"
-
-enum Token {
-  tok_eof = -1,
-  tok_def = -2,
-  tok_extern = -3,
-  tok_identifier = -4,
-  tok_number = -5,
-  tok_comm = -6,
-  tok_nline = -7,
-  tok_unknown = -8,
-};
+#include "../include/type_def.h"
 
 static std::string IdentifierStr;
 static double NumVal;
 static Token CurTok;
 
+// lexer, recoginze tokens
 static void dump_token(Token tok) {
   switch (tok) {
     case tok_eof:
@@ -100,6 +90,12 @@ static Token gettok() {
 
 static Token getNextToken() {
   return CurTok = gettok();
+}
+
+// log function
+std::unique_ptr<ExprAST> logError(const char *str) {
+  fprintf(stderr, "Logerr: %s\n", str);
+  return nullptr;
 }
 
 int main() {
