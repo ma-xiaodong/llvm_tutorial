@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 
+// type definition
 enum Token {
   tok_eof = -1,
   tok_def = -2,
@@ -72,4 +73,26 @@ public:
               std::unique_ptr<ExprAST> body) 
     : Proto(std::move(proto)), Body(std::move(body)) {}
 };
+
+// function definition
+static void dump_token(Token tok);
+static int gettok();
+static int getNextToken();
+static std::unique_ptr<ExprAST> LogError(const char *str);
+static std::unique_ptr<ExprAST> ParseNumberExpr();
+static std::unique_ptr<ExprAST> ParseParenExpr();
+static std::unique_ptr<ExprAST> ParseIndentifierExpr();
+static std::unique_ptr<ExprAST> ParsePrimary();
+static std::unique_ptr<ExprAST> ParseExpression();
+static int GetTokPrecedence();
+static std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec, 
+                                              std::unique_ptr<ExprAST> LHS);
+static std::unique_ptr<PrototypeAST> ParsePrototype();
+static std::unique_ptr<FunctionAST> ParseDefinition();
+static std::unique_ptr<PrototypeAST> ParseExtern();
+static std::unique_ptr<FunctionAST> ParseTopLevelExpr();
+static void MainLoop();
+static void HandleDefinition();
+static void HandleExtern();
+static void HandleTopLevelExpression();
 
