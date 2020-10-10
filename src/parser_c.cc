@@ -1,7 +1,8 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include "../include/type_def.h"
+#include "../include/token.h"
+#include "../include/parser_c.h"
 
 static std::string IdentifierStr;
 static double NumVal;
@@ -9,6 +10,26 @@ static int CurTok;
 static std::map<char, int> BinopPrecedence;
 // char corresponding to unknown token
 static char ThisChar;
+
+static void dump_token(Token tok);
+static int getNextToken();
+static std::unique_ptr<ExprAST> LogError(const char *str);
+static std::unique_ptr<ExprAST> ParseNumberExpr();
+static std::unique_ptr<ExprAST> ParseParenExpr();
+static std::unique_ptr<ExprAST> ParseIndentifierExpr();
+static std::unique_ptr<ExprAST> ParsePrimary();
+static std::unique_ptr<ExprAST> ParseExpression();
+static int GetTokPrecedence();
+static std::unique_ptr<ExprAST> ParseBinOpRHS(int ExprPrec,
+                                              std::unique_ptr<ExprAST> LHS);
+static std::unique_ptr<PrototypeAST> ParsePrototype();
+static std::unique_ptr<FunctionAST> ParseDefinition();
+static std::unique_ptr<PrototypeAST> ParseExtern();
+static std::unique_ptr<FunctionAST> ParseTopLevelExpr();
+static void MainLoop();
+static void HandleDefinition();
+static void HandleExtern();
+static void HandleTopLevelExpression();
 
 // lexer, recoginze tokens
 static void dump_token(Token tok) {
@@ -40,60 +61,14 @@ static void dump_token(Token tok) {
   }
 }
 
-static int gettok() {
-  static char LastChar = ' ';
-
-  while (isspace(LastChar))
-    LastChar = getchar();
-
-  // identifier or keywords (def, extern)
-  if (isalpha(LastChar)) {
-    IdentifierStr = LastChar;
-    while (isalnum((LastChar = getchar())))
-      IdentifierStr += LastChar;
-
-    if (IdentifierStr == "def")
-      return tok_def;
-    if (IdentifierStr == "extern")
-      return tok_extern;
-    return tok_identifier;
-  }
-
-  // numbers
-  if (isdigit(LastChar) || LastChar == '.') {
-    std::string NumStr;
-    do {
-      NumStr += LastChar;
-      LastChar = getchar();
-    } while (isdigit(LastChar) || LastChar == '.');
-    NumVal = strtod(NumStr.c_str(), 0);
-    return tok_number;
-  }
-
-  // eof token
-  if (LastChar == EOF)
-    return tok_eof;
-
-  // new line
-  if (LastChar == '\n' || LastChar == '\r')
-    return tok_nline;
-
-  // comments
-  if (LastChar == '#') {
-    do {
-      LastChar = getchar();
-    } while (LastChar != EOF && LastChar != '\n' && LastChar != '\r');
-    return tok_comm;
-  }
-
-  ThisChar = LastChar;
-  LastChar = getchar();
-  // std::cout << "WARNNING: unknown char : " << ThisChar << std::endl;
-  return ThisChar;
-}
-
 static int getNextToken() {
-  CurTok = gettok();
+  TokenInfo tokInfo;
+
+  tokInfo = gettok();
+  CurTok = tokInfo.tok;
+  IdentifierStr = tokInfo.identifierStr;
+  NumVal = tokInfo.numVal;
+
   return CurTok;
 }
 
