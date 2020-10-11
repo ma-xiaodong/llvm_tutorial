@@ -385,7 +385,8 @@ static std::unique_ptr<PrototypeAST> ParseExtern() {
 static void HandleDefinition() {
   if (auto FnAST = ParseDefinition()) {
     if (auto *FnIR = FnAST->codegen()) {
-      fprintf(stderr, "Read function definition: \n");
+      fprintf(stderr, "Read function definition:");
+      FnIR->print(errs());
     }
   } else {
     fprintf(stderr, "No definition to handle.\n");
@@ -396,7 +397,8 @@ static void HandleDefinition() {
 static void HandleExtern() {
   if (auto ProtoAST = ParseExtern()) {
     if (auto *FnIR = ProtoAST->codegen()) {
-      fprintf(stderr, "Read extern: \n");
+      fprintf(stderr, "Read extern: ");
+      FnIR->print(errs());
     }
   } else {
     fprintf(stderr, "No extern to handle.\n");
@@ -406,8 +408,9 @@ static void HandleExtern() {
 
 static void HandleTopLevelExpression() {
   if (auto FnAST = ParseTopLevelExpr()) {
-    if (auto *FnIr = FnAST->codegen()) {
-      fprintf(stderr, "Read top level expr \n");
+    if (auto *FnIR = FnAST->codegen()) {
+      fprintf(stderr, "Read top level expr: ");
+      FnIR->print(errs());
     }
   } else {
     fprintf(stderr, "No top level expr to handle.");
@@ -447,7 +450,7 @@ int main() {
 
   MainLoop();
 
-  TheModule->print(errs(), nullptr);
+  // TheModule->print(errs(), nullptr);
 
   return 0;
 }
